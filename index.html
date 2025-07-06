@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Babylon.js FPS Modular</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="instructions">Click to Play</div>
+  <div id="crosshair"></div>
+
+  <div id="settings">
+    <!-- 📷 Camera Settings -->
+    <label for="mouseSensitivity">Mouse Sensitivity: <span id="sensLabel">1000</span></label>
+    <input id="mouseSensitivity" type="range" min="100" max="2000" step="10" value="960">
+    </label>
+
+    <label for="fov">FOV:
+      <input id="fov" type="range" min="30" max="120" value="110" />
+    </label>
+
+    <hr />
+
+    <!-- 🧟 Enemy Settings -->
+    <label for="enemyCount">Number of Enemies:
+      <input id="enemyCount" type="number" value="1" step="1" min="1" />
+    </label>
+    <label for="enemyMaxHeight">Max Enemy Height:
+      <input id="enemyMaxHeight" type="number" value="5" step="0.5" min="1" />
+    </label>
+    <button onclick="respawnAllEnemies()">Respawn All Enemies</button>
+  </div>
+
+  <canvas id="renderCanvas"></canvas>
+
+  <!-- Babylon.js Libraries -->
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/ammo.js"></script>
+  <script src="https://cdn.babylonjs.com/materialsLibrary/babylon.gridMaterial.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+
+  <!-- Entry Point -->
+  <script type="module" src="js/game.js"></script>
+</body>
+</html>
