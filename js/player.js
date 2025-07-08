@@ -67,29 +67,35 @@ const speed = useShift ? sprintSpeed : walkSpeed;
 
   let move = BABYLON.Vector3.Zero();
   if (useW) move.addInPlace(forward);
-  if (input.s) move.subtractInPlace(forward);
+  if (isGrounded && input.s) move.subtractInPlace(forward);  // ❌ disable S in air
   if (input.a) move.subtractInPlace(right);
   if (input.d) move.addInPlace(right);
   move.y = 0;
 
   const isMoving = move.lengthSquared() > 0.01;
 
-  // ✅ Play movement sounds
-  if (isGrounded && isMoving) {
+if (!player.currentSound) player.currentSound = null;
+
+const isSoundPlaying = (sound, id) => id !== undefined && sound.playing(id);
+
+if (isGrounded && isMoving) {
     if (useShift) {
-      if (!sounds.sprint.playing()) {
+      if (player.currentSound !== 'sprint' || !isSoundPlaying(sounds.sprint, player.sprintId)) {
         sounds.walk.stop();
-        sounds.sprint.play();
+        player.sprintId = sounds.sprint.play();
+        player.currentSound = 'sprint';
       }
     } else {
-      if (!sounds.walk.playing()) {
+      if (player.currentSound !== 'walk' || !isSoundPlaying(sounds.walk, player.walkId)) {
         sounds.sprint.stop();
-        sounds.walk.play();
+        player.walkId = sounds.walk.play();
+        player.currentSound = 'walk';
       }
-    }
+  }
   } else {
     sounds.walk.stop();
     sounds.sprint.stop();
+    player.currentSound = null;
   }
 
   if (isMoving) {

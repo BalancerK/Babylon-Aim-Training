@@ -23,12 +23,15 @@
 
     <!-- 🧟 Enemy Settings -->
     <label for="enemyCount">Number of Enemies:
-      <input id="enemyCount" type="number" value="1" step="1" min="1" />
-    </label>
-    <label for="enemyMaxHeight">Max Enemy Height:
-      <input id="enemyMaxHeight" type="number" value="5" step="0.5" min="1" />
+      <input id="enemyCount" type="number" value="10" step="1" min="1" />
     </label>
     <button onclick="respawnAllEnemies()">Respawn All Enemies</button>
+
+    <label>BG Music Volume</label>
+    <input id="bgVolume" type="range" min="0" max="1" step="0.01" value="0.5">
+
+    <label>FX Volume</label>
+    <input id="fxVolume" type="range" min="0" max="1" step="0.01" value="0.8">
   </div>
 
   <canvas id="renderCanvas"></canvas>
