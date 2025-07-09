@@ -50,40 +50,67 @@ if (enemyCountInput) {
 
 let isAudioInitialized = false;
 
-canvas.addEventListener("pointerdown", () => {
+document.getElementById("instructions").addEventListener("click", () => {
   if (isAudioInitialized) return;
   isAudioInitialized = true;
 
-  console.log("🔊 Pointer down triggered");
+  const instructions = document.getElementById("instructions");
+  const countdownOverlay = document.getElementById("countdownOverlay");
 
+  if (instructions) instructions.style.display = "none";
+  if (countdownOverlay) countdownOverlay.style.display = "block";
+
+  // Background music
   if (sounds.bg && !sounds.bg.playing()) {
     sounds.bg.play();
-    console.log("🎵 Background music started.");
-  } else {
-    console.warn("⚠️ sounds.bg not ready or already playing.");
   }
 
-  // ✅ START GAME TIMER HERE
-  timerInterval = setInterval(() => {
-    if (gameFrozen) return;
+  // Countdown logic
+  const sequence = ["3", "2", "1", "GO!"];
+  let step = 0;
 
-    timeLeft--;
-    updateHUD(score, timeLeft);
+  const nextCount = () => {
+    if (step < sequence.length) {
+      countdownOverlay.textContent = sequence[step];
+      countdownOverlay.style.animation = "none"; // restart animation
+      countdownOverlay.offsetHeight; // trigger reflow
+      countdownOverlay.style.animation = "pop 0.8s ease-in-out";
+      step++;
+      setTimeout(nextCount, 900);
+    } else {
+      countdownOverlay.style.display = "none";
 
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-      gameFrozen = true;
-
-      if (document.pointerLockElement) {
-        document.exitPointerLock();
+      // Start game officially
+      if (scene) {
+        createEnemies(scene);
+        updateEnemies(scene, engine);
       }
 
-      engine.stopRenderLoop();
+      // Game timer starts
+      timerInterval = setInterval(() => {
+        if (gameFrozen) return;
 
-      const accuracy = shotsFired > 0 ? (hits / shotsFired) * 100 : 0;
-      showGameOver(score, accuracy, resetGame);
+        timeLeft--;
+        updateHUD(score, timeLeft);
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          gameFrozen = true;
+
+          if (document.pointerLockElement) {
+            document.exitPointerLock();
+          }
+
+          engine.stopRenderLoop();
+
+          const accuracy = shotsFired > 0 ? (hits / shotsFired) * 100 : 0;
+          showGameOver(score, accuracy, resetGame);
+        }
+      }, 1000);
     }
-  }, 1000);
+  };
+
+  nextCount(); // start the sequence
 }, { once: true });
 
 window.respawnAllEnemies = () => respawnAllEnemies(scene);
@@ -160,8 +187,8 @@ async function createScene() {
   ground.material = gridMaterial;
 
   // Invisible boundary walls
-  const wallThickness = 1;
-  const wallHeight = 10;
+  const wallThickness = 2;
+  const wallHeight = 20;
   const groundSize = 100;
 
   // 🌌 SKYBOX SETUP
@@ -253,10 +280,23 @@ function applyCustomSkybox(dataURL) {
   backWall.checkCollisions = true;
   backWall.isVisible = false;
 
+  // Roof (invisible ceiling to prevent bullets or entities from going too high)
+  const roof = BABYLON.MeshBuilder.CreateBox("roof", {
+   width: groundSize,
+   height: 1,
+   depth: groundSize
+  }, scene);
+
+roof.position = new BABYLON.Vector3(0, 20, 0); // Adjust Y to desired ceiling height
+roof.isVisible = false;
+roof.checkCollisions = true;
+roof.isPickable = true; // allow bullets to detect hit
+
+
   player = createPlayer(newScene);
   initInput();
-  createEnemies(newScene);
-  updateEnemies(newScene, engine);
+  //createEnemies(newScene);
+  //updateEnemies(newScene, engine);
   attachPointerEvents(newScene, camera, canvas);
   // Crosshair upload setup
 const crosshair = document.getElementById("crosshair");

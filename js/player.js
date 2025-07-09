@@ -132,10 +132,11 @@ if (isGrounded && isMoving) {
       target = hit.pickedPoint.clone();
       target.y += 2;
     }
-
-    player.position.copyFrom(target);
-    player.velocity.y = 0;
-    sounds.teleport?.play();
+    if (target.y < 18) {  // slightly below the roof's Y position (20
+      player.position.copyFrom(target);
+      player.velocity.y = 0;
+      sounds.teleport?.play();
+    }
   }
   // Reset teleport state when Q is released
   if (!input.teleport) {
