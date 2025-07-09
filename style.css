@@ -65,13 +65,38 @@ canvas {
   position: absolute;
   top: 10px;
   left: 10px;
-  background: rgba(20, 20, 20, 0.85);
-  padding: 12px 15px;
+  background: rgba(20, 20, 20, 0.9);
   color: #eee;
   font-size: 14px;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.6);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
   z-index: 3;
+  overflow: hidden;
+  max-width: 260px;
+}
+
+#settingsHeader {
+  padding: 10px;
+  background: #222;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  border-bottom: 1px solid #444;
+  user-select: none;
+}
+
+#settingsHeader:hover {
+  background-color: #333;
+}
+
+#settingsContent {
+  display: none;
+  padding: 10px 15px;
+  background: rgba(20, 20, 20, 0.9);
+}
+
+#settings.open #settingsContent {
+  display: block;
 }
 
 #settings label {
@@ -94,4 +119,103 @@ canvas {
 #settings input:focus {
   outline: 1px solid #5fa8d3;
   background: #444;
+}
+
+.setting-section {
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #444;
+}
+
+.setting-section h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 16px;
+  color: #77c9ff;
+  border-bottom: 1px solid #333;
+  padding-bottom: 4px;
+}
+
+.upload-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.upload-group button {
+  flex: 1;
+  background: #2e2e2e;
+  color: #fff;
+  border: none;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.upload-group button:hover {
+  background: #444;
+}
+
+#settings input[type="range"] {
+  width: 100%;
+}
+
+#crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Default cross lines */
+#crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+#crosshair::before,
+#crosshair::after {
+  content: "";
+  position: absolute;
+  background: white;
+}
+
+#crosshair::before {
+  width: 2px;
+  height: 20px;
+  left: 9px;
+  top: 0;
+}
+
+#crosshair::after {
+  width: 20px;
+  height: 2px;
+  top: 9px;
+  left: 0;
+}
+
+/* Hide lines when custom image is used */
+#crosshair.custom::before,
+#crosshair.custom::after {
+  display: none;
+}
+
+#hitFlash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 0, 0, 0.4);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 100;
+  transition: opacity 0.15s ease;
 }

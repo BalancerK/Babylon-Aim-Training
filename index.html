@@ -9,30 +9,54 @@
   <div id="instructions">Click to Play</div>
   <div id="crosshair"></div>
 
+  <!-- 📦 Expandable Settings Panel -->
   <div id="settings">
-    <!-- 📷 Camera Settings -->
-    <label for="mouseSensitivity">Mouse Sensitivity: <span id="sensLabel">1000</span></label>
-    <input id="mouseSensitivity" type="range" min="100" max="2000" step="10" value="960">
-    </label>
+    <div id="settingsHeader">⚙️ Settings</div>
+     <div id="settingsContent">
+     <div class="setting-section">
+        <h3>🎮 Controls</h3>
+        <label for="mouseSensitivity">Mouse Sensitivity: <span id="sensLabel">1000</span></label>
+        <input id="mouseSensitivity" type="range" min="100" max="2000" step="10" value="960" />
 
-    <label for="fov">FOV:
-      <input id="fov" type="range" min="30" max="120" value="110" />
-    </label>
+         <label for="fov">Field of View</label>
+        <input id="fov" type="range" min="30" max="120" value="110" />
+      </div>
 
-    <hr />
+       <div class="setting-section">
+         <h3>🧟 Enemies</h3>
+         <label for="enemyCount">Number of Enemies: <span id="enemyCountLabel">10</span></label>
+         <input id="enemyCount" type="range" min="0" max="20" step="1" value="10" />
+         <button onclick="respawnAllEnemies()">Respawn Enemies</button>
+     </div>
 
-    <!-- 🧟 Enemy Settings -->
-    <label for="enemyCount">Number of Enemies:
-      <input id="enemyCount" type="number" value="10" step="1" min="1" />
-    </label>
-    <button onclick="respawnAllEnemies()">Respawn All Enemies</button>
+       <div class="setting-section">
+        <h3>🔊 Audio</h3>
+        <label for="bgVolume">Music Volume</label>
+       <input id="bgVolume" type="range" min="0" max="1" step="0.01" value="0.5" />
 
-    <label>BG Music Volume</label>
-    <input id="bgVolume" type="range" min="0" max="1" step="0.01" value="0.5">
+       <label for="fxVolume">FX Volume</label>
+        <input id="fxVolume" type="range" min="0" max="1" step="0.01" value="0.8" />
+       </div>
 
-    <label>FX Volume</label>
-    <input id="fxVolume" type="range" min="0" max="1" step="0.01" value="0.8">
-  </div>
+       <div class="setting-section">
+        <h3>🎯 Crosshair</h3>
+       <div class="upload-group">
+            <input type="file" id="crosshairUpload" accept="image/*" hidden />
+            <button onclick="document.getElementById('crosshairUpload').click()">Upload Crosshair</button>
+            <button onclick="resetCrosshair()">Reset</button>
+        </div>
+      </div>
+
+       <div class="setting-section">
+        <h3>🌌 Skybox</h3>
+        <div class="upload-group">
+          <input type="file" id="skyboxUpload" accept="image/*" hidden />
+          <button onclick="document.getElementById('skyboxUpload').click()">Upload Skybox</button>
+          <button id="resetSkybox">Reset</button>
+         </div>
+       </div>
+     </div>
+    </div>
 
   <canvas id="renderCanvas"></canvas>
 
@@ -40,9 +64,45 @@
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script src="https://cdn.babylonjs.com/ammo.js"></script>
   <script src="https://cdn.babylonjs.com/materialsLibrary/babylon.gridMaterial.min.js"></script>
+  <script src="https://cdn.babylonjs.com/materialsLibrary/babylon.skyMaterial.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
 
-  <!-- Entry Point -->
+  <!-- Main Game Entry -->
   <script type="module" src="js/game.js"></script>
+
+  <!-- 🧠 UI Logic -->
+  <script>
+    const enemySlider = document.getElementById("enemyCount");
+    const enemyLabel = document.getElementById("enemyCountLabel");
+
+    enemySlider.addEventListener("input", () => {
+      enemyLabel.textContent = enemySlider.value;
+      localStorage.setItem("enemyCount", enemySlider.value);
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedEnemyCount = localStorage.getItem("enemyCount");
+      if (savedEnemyCount !== null) {
+        enemySlider.value = savedEnemyCount;
+        enemyLabel.textContent = savedEnemyCount;
+      }
+    });
+
+    // Expand/retract settings panel
+    const settings = document.getElementById("settings");
+    const settingsHeader = document.getElementById("settingsHeader");
+    const settingsContent = document.getElementById("settingsContent");
+
+    settingsHeader.addEventListener("click", () => {
+      settings.classList.toggle("open");
+    });
+
+    // Auto-close settings when clicking canvas (re-entering game)
+    const canvas = document.getElementById("renderCanvas");
+    canvas.addEventListener("click", () => {
+      settings.classList.remove("open");
+    });
+  </script>
+  <div id="hitFlash"></div>
 </body>
 </html>
