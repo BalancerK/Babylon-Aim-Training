@@ -8,6 +8,7 @@ const fxRatios = {
   teleport: 1,
   shoot: 0.8,
   hit: 1.5,
+  playerhit: 1.0,
 };
 
 export function loadHowlerSounds() {

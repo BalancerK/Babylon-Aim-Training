@@ -16,6 +16,24 @@ let timeLeft = 60;
 let timerInterval;
 let gameFrozen = false;
 
+window.modifyScore = (amount) => {
+  if (gameFrozen) return;
+
+  score = Math.max(0, score + amount);
+  updateHUD(score, timeLeft);
+};
+
+window.resetCrosshair = () => {
+  localStorage.removeItem("customCrosshair");
+  const crosshair = document.getElementById("crosshair");
+  if (crosshair) {
+    crosshair.style.backgroundImage = "";
+    crosshair.classList.remove("custom");
+    crosshair.style.width = "20px";
+    crosshair.style.height = "20px";
+  }
+};
+
 // Load and apply saved enemy count on start
 const enemyCountInput = document.getElementById("enemyCount");
 const savedEnemyCount = localStorage.getItem("enemyCount");
@@ -146,6 +164,71 @@ async function createScene() {
   const wallHeight = 10;
   const groundSize = 100;
 
+  // 🌌 SKYBOX SETUP
+let skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000 }, newScene);
+let skyMaterial = new BABYLON.SkyMaterial("skyMaterial", newScene);
+skyMaterial.backFaceCulling = false;
+skyMaterial.inclination = 0.3;
+skyMaterial.luminance = 1.0;
+skyMaterial.turbidity = 4.5;
+skybox.material = skyMaterial;
+newScene.clearColor = new BABYLON.Color3(0.6, 0.8, 1.0);
+
+// Check for custom skybox
+const storedSkybox = localStorage.getItem("customSkybox");
+if (storedSkybox) {
+  applyCustomSkybox(storedSkybox);
+}
+
+// 🔁 Skybox upload/reset
+const skyboxInput = document.getElementById("skyboxUpload");
+const resetBtn = document.getElementById("resetSkybox");
+
+skyboxInput.addEventListener("change", function () {
+  const file = skyboxInput.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const dataURL = e.target.result;
+    localStorage.setItem("customSkybox", dataURL);
+    applyCustomSkybox(dataURL);
+  };
+  reader.readAsDataURL(file);
+});
+
+resetBtn.addEventListener("click", () => {
+  localStorage.removeItem("customSkybox");
+  skybox.material = skyMaterial;
+});
+
+// 🎨 Function: apply custom skybox
+function applyCustomSkybox(dataURL) {
+  // Convert image to 6 square faces using dynamic texture
+  const faceData = new Array(6).fill(dataURL);
+  const files = {
+    px: faceData[0],
+    nx: faceData[1],
+    py: faceData[2],
+    ny: faceData[3],
+    pz: faceData[4],
+    nz: faceData[5],
+  };
+
+  const texture = new BABYLON.CubeTexture.CreateFromImages([
+    files.px, files.nx, files.py, files.ny, files.pz, files.nz,
+  ], newScene, undefined, false, null, () => {}, () => {}, dataURL);
+
+  const skyboxMat = new BABYLON.StandardMaterial("skyboxMat", newScene);
+  skyboxMat.backFaceCulling = false;
+  skyboxMat.reflectionTexture = texture;
+  skyboxMat.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+  skyboxMat.disableLighting = true;
+
+  skybox.material = skyboxMat;
+}
+
+
   // Left wall
   const leftWall = BABYLON.MeshBuilder.CreateBox("leftWall", { width: wallThickness, height: wallHeight, depth: groundSize }, scene);
   leftWall.position = new BABYLON.Vector3(-groundSize / 2 - wallThickness / 2, wallHeight / 2, 0);
@@ -175,6 +258,47 @@ async function createScene() {
   createEnemies(newScene);
   updateEnemies(newScene, engine);
   attachPointerEvents(newScene, camera, canvas);
+  // Crosshair upload setup
+const crosshair = document.getElementById("crosshair");
+const crosshairInput = document.getElementById("crosshairUpload");
+
+// ✅ Load custom crosshair if saved
+const savedCrosshair = localStorage.getItem("customCrosshair");
+if (savedCrosshair) {
+  applyCustomCrosshair(savedCrosshair);
+}
+
+function applyCustomCrosshair(dataURL) {
+  crosshair.classList.add("custom");
+  crosshair.style.backgroundImage = `url(${dataURL})`;
+  crosshair.style.backgroundRepeat = "no-repeat";
+  crosshair.style.backgroundPosition = "center";
+
+  const img = new Image();
+  img.onload = function () {
+    crosshair.style.width = img.width + "px";
+    crosshair.style.height = img.height + "px";
+  };
+  img.src = dataURL;
+}
+
+// ✅ Handle image upload
+crosshairInput.addEventListener("change", function () {
+  const file = crosshairInput.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const dataURL = e.target.result;
+    applyCustomCrosshair(dataURL);
+    localStorage.setItem("customCrosshair", dataURL);
+  };
+  reader.readAsDataURL(file);
+});
+
+
+
+  
 
   canvas.addEventListener("mousedown", () => {
     if (gameFrozen) return;
@@ -195,7 +319,7 @@ async function createScene() {
     const input = getInputState();
 
     updatePlayerMovement(newScene, player, camera, input, deltaTime);
-    updateEnemies(newScene);
+    updateEnemies(newScene, player);
     updateCamera(camera, player);
 
     resetJump();
